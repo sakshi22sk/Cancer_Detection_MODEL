@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<section class="result-container">
+
+<h1>Image Analysis</h1>
+
+<div class="image-grid">
+
+<div class="img-box">
+    <h3>Original</h3>
+    <img src="{{ image }}">
+</div>
+
+<div class="img-box">
+    <h3>Grad-CAM Heatmap</h3>
+    <img src="{{ image }}">
+</div>
+
+</div>
+
+<div class="result-card">
+    <h2>{{ result }}</h2>
+    <p>Confidence: {{ confidence }}%</p>
+    <p class="risk {{ risk|lower }}">{{ risk }} RISK</p>
+</div>
+
+</section>
+
+</body>
+</html>
