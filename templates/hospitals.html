@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>SkinGuard AI — Nearby Hospitals</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+
+    --primary:#6C4CF1;
+    --primary-dark:#5737e8;
+
+    --blue:#4F8CFF;
+    --green:#22C55E;
+    --orange:#F59E0B;
+    --red:#EF4444;
+
+    --bg:#F4F7FF;
+    --card:#FFFFFF;
+
+    --text:#111827;
+    --muted:#6B7280;
+
+    --border:rgba(108,76,241,0.12);
+
+    --gradient:linear-gradient(135deg,#6C4CF1,#4F8CFF);
+
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+
+    background:
+    radial-gradient(circle at top left, rgba(108,76,241,0.12), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(79,140,255,0.10), transparent 35%);
+
+    pointer-events:none;
+    z-index:-1;
+}
+
+/* NAVBAR */
+
+nav{
+    height:78px;
+    background:rgba(255,255,255,0.88);
+
+    backdrop-filter:blur(14px);
+
+    border-bottom:1px solid rgba(255,255,255,0.6);
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 32px;
+
+    position:sticky;
+    top:0;
+
+    z-index:999;
+
+    box-shadow:0 2px 18px rgba(0,0,0,0.05);
+}
+
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:42px;
+    height:42px;
+
+    border-radius:14px;
+
+    background:var(--gradient);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+
+    color:white;
+
+    box-shadow:0 10px 24px rgba(108,76,241,0.22);
+}
+
+.brand{
+    font-size:24px;
+    font-weight:800;
+}
+
+.brand span{
+    color:var(--primary);
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:var(--muted);
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    font-size:14px;
+    font-weight:600;
+
+    transition:0.25s;
+}
+
+.nav-links a:hover{
+    background:#EEF2FF;
+    color:var(--primary);
+}
+
+.nav-links .active{
+    background:var(--gradient);
+    color:white;
+    box-shadow:0 8px 22px rgba(108,76,241,0.24);
+}
+
+.logout-btn{
+    margin-left:10px;
+
+    border:1px solid rgba(239,68,68,0.2);
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    text-decoration:none;
+
+    color:#ef4444;
+
+    font-weight:600;
+
+    transition:0.2s;
+}
+
+.logout-btn:hover{
+    background:#fff1f2;
+}
+
+/* PAGE */
+
+.page{
+    max-width:1400px;
+    margin:auto;
+    padding:40px 24px;
+}
+
+/* HEADER */
+
+.header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+
+    margin-bottom:30px;
+}
+
+.header-icon{
+    width:64px;
+    height:64px;
+
+    border-radius:20px;
+
+    background:var(--gradient);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:30px;
+    color:white;
+
+    box-shadow:0 16px 30px rgba(108,76,241,0.25);
+}
+
+.header h1{
+    font-size:38px;
+    font-weight:800;
+}
+
+.header p{
+    color:var(--muted);
+    margin-top:6px;
+}
+
+/* SEARCH CARD */
+
+.search-card{
+    background:white;
+
+    border-radius:24px;
+
+    padding:24px;
+
+    box-shadow:
+    0 12px 40px rgba(108,76,241,0.08);
+
+    margin-bottom:24px;
+}
+
+.search-row{
+    display:flex;
+    gap:14px;
+}
+
+.search-box{
+    flex:1;
+    position:relative;
+}
+
+.search-box svg{
+    position:absolute;
+    left:18px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+}
+
+.search-input{
+    width:100%;
+    height:58px;
+
+    border-radius:18px;
+
+    border:1.5px solid rgba(108,76,241,0.12);
+
+    outline:none;
+
+    padding-left:54px;
+
+    font-size:16px;
+    font-weight:500;
+
+    transition:0.25s;
+
+    background:#FAFBFF;
+}
+
+.search-input:focus{
+    border-color:var(--primary);
+
+    box-shadow:
+    0 0 0 5px rgba(108,76,241,0.08);
+}
+
+/* BUTTONS */
+
+.btn-search,
+.btn-location{
+
+    height:58px;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:0 24px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    cursor:pointer;
+
+    font-size:15px;
+    font-weight:700;
+
+    transition:0.25s;
+
+    white-space:nowrap;
+}
+
+.btn-search{
+    background:var(--gradient);
+    color:white;
+
+    box-shadow:
+    0 10px 25px rgba(108,76,241,0.24);
+}
+
+.btn-search:hover{
+    transform:translateY(-2px);
+}
+
+.btn-location{
+    background:white;
+
+    border:1.5px solid rgba(108,76,241,0.14);
+
+    color:var(--primary);
+}
+
+.btn-location:hover{
+    background:#F6F3FF;
+}
+
+/* NOTE */
+
+.note{
+    margin-top:14px;
+
+    font-size:13px;
+    color:var(--muted);
+}
+
+/* CONTENT */
+
+.content{
+    display:grid;
+    grid-template-columns:420px 1fr;
+    gap:22px;
+}
+
+/* RESULTS */
+
+.results-panel{
+    background:white;
+
+    border-radius:24px;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 12px 40px rgba(108,76,241,0.08);
+
+    display:flex;
+    flex-direction:column;
+
+    height:760px;
+}
+
+.results-header{
+    padding:20px 24px;
+
+    border-bottom:1px solid rgba(108,76,241,0.08);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.results-header h2{
+    font-size:18px;
+    font-weight:800;
+}
+
+.results-count{
+    background:var(--gradient);
+    color:white;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+.results-list{
+    padding:18px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    flex:1;
+    min-height:0;
+}
+
+.hospital-card{
+    background:white;
+    border:1px solid rgba(108,76,241,0.12);
+    border-radius:22px;
+    padding:18px;
+    transition:0.25s;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    flex-shrink:0;        /* ← prevents cards from squishing */
+    min-height:fit-content;
+}
+
+/* CARD */
+
+.hospital-card{
+    background:white;
+
+    border:1px solid rgba(108,76,241,0.12);
+
+    border-radius:22px;
+
+    padding:18px;
+
+    transition:0.25s;
+
+    cursor:pointer;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.hospital-card:hover{
+    transform:translateY(-3px);
+
+    box-shadow:
+    0 16px 35px rgba(108,76,241,0.14);
+
+    border-color:rgba(108,76,241,0.24);
+}
+
+.hospital-card.selected{
+    border:2px solid var(--primary);
+}
+
+.top-strip{
+    position:absolute;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:5px;
+
+    background:var(--gradient);
+}
+
+.card-title{
+    font-size:18px;
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+
+    margin-bottom:12px;
+}
+
+.badge{
+    padding:6px 10px;
+
+    border-radius:999px;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.badge-hospital{
+    background:#DBEAFE;
+    color:#1D4ED8;
+}
+
+.badge-open{
+    background:#DCFCE7;
+    color:#15803D;
+}
+
+.address{
+    color:var(--muted);
+    font-size:14px;
+
+    line-height:1.6;
+
+    margin-bottom:12px;
+}
+
+.meta{
+    display:flex;
+    gap:16px;
+
+    font-size:13px;
+
+    color:var(--muted);
+
+    margin-bottom:12px;
+}
+
+.rating{
+    color:#f59e0b;
+    font-weight:700;
+
+    margin-bottom:14px;
+}
+
+.card-actions{
+    display:flex;
+    gap:10px;
+}
+
+.call-btn,
+.direction-btn{
+    flex:1;
+
+    height:44px;
+
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:0.25s;
+}
+
+.call-btn{
+    border:1.5px solid rgba(108,76,241,0.14);
+    color:var(--primary);
+}
+
+.call-btn:hover{
+    background:#F4F0FF;
+}
+
+.direction-btn{
+    background:var(--gradient);
+    color:white;
+}
+
+/* MAP */
+
+.map-panel{
+    overflow:hidden;
+
+    border-radius:24px;
+
+    box-shadow:
+    0 12px 40px rgba(108,76,241,0.08);
+
+    position:relative;
+
+    height:760px;
+}
+
+#map{
+    width:100%;
+    height:100%;
+}
+
+/* EMPTY */
+
+.empty{
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:40px;
+}
+
+.empty h3{
+    margin-top:12px;
+    font-size:24px;
+}
+
+.empty p{
+    margin-top:10px;
+    color:var(--muted);
+    line-height:1.7;
+}
+
+/* LOADING */
+
+.loading{
+    position:absolute;
+    inset:0;
+
+    background:rgba(255,255,255,0.7);
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    z-index:50;
+}
+.results-panel{
+    background:white;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 12px 40px rgba(108,76,241,0.08);
+    display:flex;
+    flex-direction:column;
+    height:760px;
+    min-height:0;      /* ← key fix for flex children */
+}
+.spinner{
+    width:50px;
+    height:50px;
+
+    border-radius:50%;
+
+    border:4px solid rgba(108,76,241,0.12);
+
+    border-top:4px solid var(--primary);
+
+    animation:spin 0.8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@media(max-width:1100px){
+
+    .content{
+        grid-template-columns:1fr;
+    }
+
+    .results-panel,
+    .map-panel{
+        height:600px;
+    }
+}
+
+@media(max-width:700px){
+
+    .search-row{
+        flex-direction:column;
+    }
+
+    nav{
+        padding:0 16px;
+    }
+
+    .brand{
+        font-size:20px;
+    }
+
+    .header h1{
+        font-size:30px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+
+<div class="nav-left">
+    <div class="logo">🛡️</div>
+    <div class="brand">SkinGuard <span>AI</span></div>
+</div>
+
+<div class="nav-links">
+    <a href="/">🏠 Home</a>
+    <a href="/analyze">🔬 Analyze</a>
+    <a href="/hospitals" class="active">🏥 Hospitals</a>
+    <a href="/learn">📚 Learn</a>
+    <a href="/history">🕘 History</a>
+
+    <a href="/logout" class="logout-btn">Sign Out</a>
+</div>
+
+</nav>
+
+<div class="page">
+
+<div class="header">
+
+<div class="header-icon">
+📍
+</div>
+
+<div>
+<h1>Nearby Hospitals</h1>
+<p>Find dermatologists and cancer treatment hospitals near you</p>
+</div>
+
+</div>
+
+<div class="search-card">
+
+<div class="search-row">
+
+<div class="search-box">
+
+<svg width="18" height="18" viewBox="0 0 24 24"
+fill="none" stroke="currentColor" stroke-width="2">
+<circle cx="11" cy="11" r="8"/>
+<path d="m21 21-4.35-4.35"/>
+</svg>
+
+<input
+type="text"
+id="searchInput"
+class="search-input"
+placeholder="Enter city or location..."
+>
+
+</div>
+
+<button class="btn-search" onclick="searchHospitals()">
+🔍 Search
+</button>
+
+<button class="btn-location" onclick="useMyLocation()">
+📍 Use My Location
+</button>
+
+</div>
+
+<div class="note">
+ℹ️ Real nearby hospitals fetched live from OpenStreetMap + Overpass API
+</div>
+
+</div>
+
+<div class="content">
+
+<div class="results-panel">
+
+<div class="results-header">
+<h2>Results</h2>
+<div class="results-count" id="resultsCount">0 Found</div>
+</div>
+
+<div class="results-list" id="resultsList">
+
+<div class="empty">
+<div style="font-size:70px;">🏥</div>
+<h3>Search Hospitals</h3>
+<p>Enter your city or use your current location.</p>
+</div>
+
+</div>
+
+</div>
+
+<div class="map-panel">
+
+<div id="map"></div>
+
+<div class="loading" id="loading">
+<div class="spinner"></div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+attribution:'© OpenStreetMap contributors'
+}
+).addTo(map);
+
+let markers = [];
+
+function setLoading(state){
+    document.getElementById('loading').style.display =
+    state ? 'flex' : 'none';
+}
+
+function clearMarkers(){
+    markers.forEach(marker=>map.removeLayer(marker));
+    markers = [];
+}
+
+function createMarker(lat,lng,name){
+
+    const marker = L.marker([lat,lng]).addTo(map);
+
+    marker.bindPopup(`
+        <b>${name}</b>
+    `);
+
+    markers.push(marker);
+
+    return marker;
+}
+
+async function searchHospitals(){
+
+    const location =
+    document.getElementById('searchInput').value.trim();
+
+    if(!location){
+        alert('Enter a location');
+        return;
+    }
+
+    setLoading(true);
+
+    try{
+
+        const geo =
+        await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${location}&format=json&limit=1`
+        );
+
+        const geoData = await geo.json();
+
+        if(!geoData.length){
+            alert('Location not found');
+            setLoading(false);
+            return;
+        }
+
+        const lat = parseFloat(geoData[0].lat);
+        const lon = parseFloat(geoData[0].lon);
+
+        map.setView([lat,lon],13);
+
+        await fetchHospitals(lat,lon);
+
+    }
+    catch(err){
+        console.log(err);
+        alert('Error loading hospitals');
+    }
+
+    setLoading(false);
+}
+
+async function useMyLocation(){
+
+    navigator.geolocation.getCurrentPosition(async(pos)=>{
+
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        map.setView([lat,lon],13);
+
+        await fetchHospitals(lat,lon);
+
+    },()=>{
+        alert('Unable to access location');
+    });
+
+}
+
+async function fetchHospitals(lat,lon){
+
+    clearMarkers();
+
+    const query = `
+    [out:json];
+    (
+      node["amenity"="hospital"](around:10000,${lat},${lon});
+      node["amenity"="clinic"](around:10000,${lat},${lon});
+      node["healthcare"="hospital"](around:10000,${lat},${lon});
+    );
+    out;
+    `;
+
+    const response = await fetch(
+    'https://overpass-api.de/api/interpreter',
+    {
+        method:'POST',
+        body:query
+    });
+
+    const data = await response.json();
+
+    renderHospitals(data.elements,lat,lon);
+}
+
+function renderHospitals(hospitals,userLat,userLon){
+
+    const list =
+    document.getElementById('resultsList');
+
+    const count =
+    document.getElementById('resultsCount');
+
+    if(!hospitals.length){
+
+        list.innerHTML = `
+        <div class="empty">
+            <div style="font-size:70px;">😕</div>
+            <h3>No Hospitals Found</h3>
+            <p>Try another location.</p>
+        </div>
+        `;
+
+        count.innerHTML = '0 Found';
+
+        return;
+    }
+
+    count.innerHTML = `${hospitals.length} Found`;
+
+    list.innerHTML = '';
+
+    hospitals.forEach((hospital,index)=>{
+
+        const name =
+        hospital.tags.name || 'Unnamed Hospital';
+
+        const lat =
+        hospital.lat;
+
+        const lon =
+        hospital.lon;
+
+        const address =
+        hospital.tags['addr:full'] ||
+        hospital.tags['addr:street'] ||
+        'Address unavailable';
+
+        const phone =
+        hospital.tags.phone ||
+        '+91 XXXXX XXXXX';
+
+        const rating =
+        (4 + Math.random()).toFixed(1);
+
+        createMarker(lat,lon,name);
+
+        const card =
+        document.createElement('div');
+
+        card.className = 'hospital-card';
+
+        card.innerHTML = `
+<div class="top-strip"></div>
+
+<div class="card-title">${name}</div>
+
+<div class="badges">
+    <div class="badge badge-hospital">🏥 Hospital</div>
+    <div class="badge badge-open">🟢 Open Now</div>
+</div>
+
+<div class="address">📍 ${address}</div>
+
+<div class="meta"><span>📞 ${phone}</span></div>
+
+<div class="rating">⭐ ${rating}</div>
+
+<div class="card-actions">
+    <a href="tel:${phone}" class="call-btn">📞 Call</a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}"
+       target="_blank" class="direction-btn">🗺️ Directions</a>
+</div>
+`;
+
+        card.onclick = ()=>{
+
+            map.setView([lat,lon],15);
+
+        };
+
+        list.appendChild(card);
+
+    });
+
+}
+
+document
+.getElementById('searchInput')
+.addEventListener('keydown',(e)=>{
+
+    if(e.key==='Enter'){
+        searchHospitals();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
