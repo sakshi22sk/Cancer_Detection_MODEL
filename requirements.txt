@@ -16,3 +16,5 @@ scikit-learn
 opencv-python
 leafmap
 folium
+google-generativeai
+groq
