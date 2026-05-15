@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkinGuard AI — Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #4f6ef7;
+      --purple: #7c3aed;
+      --teal: #0d9488;
+      --bg: #f0f4ff;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --grad: linear-gradient(135deg, #4f6ef7, #7c3aed);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      animation: float 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .blob-1 { width: 500px; height: 500px; background: #7c3aed; top: -100px; right: -100px; animation-delay: 0s; }
+    .blob-2 { width: 400px; height: 400px; background: #4f6ef7; bottom: -80px; left: -80px; animation-delay: 3s; }
+    .blob-3 { width: 300px; height: 300px; background: #0d9488; top: 30%; right: 10%; animation-delay: 5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .container {
+      display: flex;
+      width: 900px;
+      max-width: 98vw;
+      min-height: 580px;
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(79,110,247,0.15);
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+      animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-right {
+      flex: 1;
+      padding: 52px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .panel-left {
+      flex: 1;
+      background: linear-gradient(135deg, #0d9488, #4f6ef7);
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      order: 2;
+    }
+
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      bottom: -60px; left: -60px;
+    }
+    .panel-left::after {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      top: 40px; right: -40px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      color: white;
+    }
+    .brand-name span { color: rgba(255,255,255,0.65); font-weight: 600; }
+
+    .panel-text { position: relative; z-index: 2; }
+    .panel-text h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 34px; font-weight: 800;
+      color: white; line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .panel-text p {
+      color: rgba(255,255,255,0.75);
+      font-size: 15px; line-height: 1.65;
+    }
+
+    .steps { display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 2; }
+    .step {
+      display: flex; align-items: center; gap: 14px;
+      color: white; font-size: 14px;
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .form-header { margin-bottom: 32px; }
+    .form-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px; font-weight: 800;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .form-header p { color: var(--muted); font-size: 15px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 13px; font-weight: 500;
+      color: var(--text); margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: #fafafa;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--blue);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(79,110,247,0.08);
+    }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .icon {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted); font-size: 16px;
+    }
+    .input-icon-wrap input { padding-left: 42px; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #0d9488, #4f6ef7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+      margin-top: 8px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(13,148,136,0.35);
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 22px 0; color: var(--muted); font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .login-link {
+      text-align: center; font-size: 14px; color: var(--muted);
+    }
+    .login-link a { color: var(--blue); font-weight: 500; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+
+    .terms {
+      font-size: 12px; color: var(--muted);
+      text-align: center; margin-top: 14px; line-height: 1.5;
+    }
+    .terms a { color: var(--blue); text-decoration: none; }
+
+    @media (max-width: 700px) {
+      .panel-left { display: none; }
+      .panel-right { padding: 40px 28px; }
+      .container { border-radius: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="container">
+    <!-- Left (form) -->
+    <div class="panel-right">
+      <div class="form-header">
+        <h1>Create account</h1>
+        <p>Join SkinGuard AI — free forever</p>
+      </div>
+
+      <form method="POST" action="/signup">
+        <div class="form-group">
+          <label>Username</label>
+          <div class="input-icon-wrap">
+            <span class="icon">👤</span>
+            <input type="text" name="username" placeholder="Choose a username" required autocomplete="username"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-icon-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" name="password" placeholder="Create a strong password" required autocomplete="new-password"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <div class="input-icon-wrap">
+            <span class="icon">✅</span>
+            <input type="password" name="confirm_password" placeholder="Repeat your password" required autocomplete="new-password"/>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account →</button>
+      </form>
+
+      <div class="terms">
+        By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+      </div>
+
+      <div class="divider">already have an account?</div>
+
+      <div class="login-link">
+        <a href="/login">Login here →</a>
+      </div>
+    </div>
+
+    <!-- Right decorative panel -->
+    <div class="panel-left">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-name">SkinGuard <span>AI</span></div>
+      </div>
+
+      <div class="panel-text">
+        <h2>Get started in seconds</h2>
+        <p>Create your free account and get instant access to AI-powered skin health tools.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <span>Create your free account</span>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <span>Upload a photo of your skin concern</span>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <span>Get instant AI analysis & nearby care</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  {% if error %}
+    alert("⚠️ Username already exists!");
+
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 1000); // 1 sec delay
+  {% endif %}
+</script>
+</body>
+</html>
