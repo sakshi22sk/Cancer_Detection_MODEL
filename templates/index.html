@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkinGuard AI - Detect Skin Cancer Early with AI</title>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+            </div>
+            SkinGuard <span>AI</span>
+        </div>
+      <div class="nav-links">
+
+    <a href="/" class="nav-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        Home
+    </a>
+
+    {% if current_user.is_authenticated %}
+
+        <a href="/dermoscan" class="nav-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Analyze
+        </a>
+
+        <a href="/hospitals" class="nav-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Hospitals
+        </a>
+        <a href="/learn" class="nav-link" style="background:#3b82f6; color:white;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Learn
+        </a>
+        <a href="/logout" class="nav-link" style="background:#ef4444; color:white;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Logout
+        </a>
+
+    {% else %}
+
+        <a href="/login" class="nav-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            Login
+        </a>
+
+        <a href="/signup" class="nav-link" style="background:#3b82f6; color:white;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Signup
+        </a>
+
+        <a href="/hospitals" class="nav-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Hospitals
+        </a>
+        <a href="/learn" class="nav-link" style="background:#3b82f6; color:white;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Learn
+        </a>
+    {% endif %}
+
+</div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="powered-badge">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                Powered by EfficientNet Deep Learning
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+            <h1>Detect Skin<br><span class="highlight">Cancer Early</span><br>with AI</h1>
+            <p class="hero-description">
+                Upload a skin image and get instant AI-powered analysis with confidence scoring, severity assessment, Grad-CAM heatmaps, and personalized medical guidance.
+            </p>
+            <div class="hero-buttons">
+                <a href="/dermoscan" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Analyze My Skin
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+                <a href="/hospitals" class="btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="12" cy="10" r="3"/>
+                        <path d="M12 21.7C17.3 17 20 13 20 10"/>
+                    </svg>
+                    Find Hospitals
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-value">98.3%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">7+</div>
+                    <div class="stat-label">Conditions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">&lt;5s</div>
+                    <div class="stat-label">Analysis Time</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="visual-circle"></div>
+            <div class="visual-center">
+                <div class="scan-icon"></div>
+            </div>
+            <div class="floating-card card-accuracy">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-label">Accuracy</div>
+                    <div class="card-value">98%</div>
+                </div>
+            </div>
+            <div class="floating-card card-risk">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-label">Risk Score</div>
+                    <div class="card-value">87%</div>
+                </div>
+            </div>
+            <div class="floating-card card-melanoma">
+                <div class="card-icon" style="background: #fee2e2; color: #ef4444;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-label">Melanoma</div>
+                    <div class="card-value">HIGH</div>
+                </div>
+            </div>
+            <div class="floating-card card-analysis">
+                <div class="card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-label">Analysis</div>
+                    <div class="card-value">DONE</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Strip -->
+    <section class="features-strip">
+        <div class="feature-item">
+            <div class="feature-icon blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <h4>AI Analysis</h4>
+                <p>EfficientNet deep learning</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <h4>Risk Assessment</h4>
+                <p>Severity scoring & guidance</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon pink">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <h4>Grad-CAM Heatmap</h4>
+                <p>Visual attention map</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon cyan">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <h4>Drag & Drop</h4>
+                <p>Easy image upload</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stat-card">
+            <div class="stat-card-icon blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <div class="stat-card-value">124,000+</div>
+            <div class="stat-card-label">Analyses Performed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                    <polyline points="17 6 23 6 23 12"/>
+                </svg>
+            </div>
+            <div class="stat-card-value">98%</div>
+            <div class="stat-card-label">Detection Accuracy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon pink">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+            </div>
+            <div class="stat-card-value">47+</div>
+            <div class="stat-card-label">Countries Served</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon green">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="stat-card-value">7</div>
+            <div class="stat-card-label">Conditions Detected</div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <span class="section-badge">Simple Process</span>
+        <h2 class="section-title">How It <span class="highlight">Works</span></h2>
+        <p class="section-subtitle">From upload to results in under 10 seconds.</p>
+        
+        <div class="steps-container">
+            <div class="step-card blue-bg">
+                <span class="step-number">01</span>
+                <div class="step-icon cyan">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h3>Upload Image</h3>
+                <p>Drag and drop or select a dermoscopic JPG/PNG image of the skin lesion.</p>
+                <span class="step-arrow">→</span>
+            </div>
+            <div class="step-card purple-bg">
+                <span class="step-number">02</span>
+                <div class="step-icon purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <h3>AI Processing</h3>
+                <p>Our EfficientNet model analyzes the image using patterns learned from 10,000+ clinical images.</p>
+                <span class="step-arrow">→</span>
+            </div>
+            <div class="step-card pink-bg">
+                <span class="step-number">03</span>
+                <div class="step-icon orange">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                </div>
+                <h3>Get Results</h3>
+                <p>Receive a confidence-scored prediction with probability distribution across all 7 conditions.</p>
+                <span class="step-arrow">→</span>
+            </div>
+            <div class="step-card green-bg">
+                <span class="step-number">04</span>
+                <div class="step-icon green">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                <h3>Take Action</h3>
+                <p>Follow AI-generated medical guidance and find nearby dermatologists instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Section -->
+    <section class="technical-section">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Our AI system leverages advanced deep learning to analyze dermoscopic images and provide clinical decision support.</p>
+        
+        <div class="tech-cards">
+            <div class="tech-card">
+                <div class="tech-card-icon blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M9 9h6v6H9z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4>Deep Learning Architecture</h4>
+                    <p>Powered by EfficientNet, a state-of-the-art convolutional neural network optimized for medical image classification.</p>
+                </div>
+            </div>
+            <div class="tech-card">
+                <div class="tech-card-icon purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="9" y1="9" x2="15" y2="9"/>
+                        <line x1="9" y1="12" x2="15" y2="12"/>
+                        <line x1="9" y1="15" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4>Medical-Grade Training Data</h4>
+                    <p>Trained on HAM10000 and ISIC datasets containing thousands of verified dermoscopic images across multiple skin conditions.</p>
+                </div>
+            </div>
+            <div class="tech-card">
+                <div class="tech-card-icon blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="4"/>
+                        <line x1="12" y1="2" x2="12" y2="4"/>
+                        <line x1="12" y1="20" x2="12" y2="22"/>
+                        <line x1="2" y1="12" x2="4" y2="12"/>
+                        <line x1="20" y1="12" x2="22" y2="12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4>Grad-CAM Visualization</h4>
+                    <p>See exactly where the AI focuses its attention using gradient-weighted class activation mapping heatmaps.</p>
+                </div>
+            </div>
+            <div class="tech-card">
+                <div class="tech-card-icon purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4>Early Detection Support</h4>
+                    <p>Supports early detection awareness by providing rapid screening results and actionable medical guidance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conditions Section -->
+    <section class="conditions-section">
+        <span class="section-badge">Condition Library</span>
+        <h2 class="section-title">Know What <span class="highlight">We Detect</span></h2>
+        <p class="section-subtitle">Our AI is trained to identify 7 skin conditions. Learn about each one.</p>
+        
+        <div class="conditions-list">
+            <div class="condition-item red">
+                <div class="condition-left">
+                    <div class="condition-letter red">M</div>
+                    <span class="condition-name">Melanoma</span>
+                </div>
+                <div class="condition-right">
+                    <span class="risk-badge high">High Risk</span>
+                    <span class="expand-icon">∨</span>
+                </div>
+            </div>
+            <div class="condition-item orange">
+                <div class="condition-left">
+                    <div class="condition-letter orange">B</div>
+                    <span class="condition-name">Basal Cell Carcinoma</span>
+                </div>
+                <div class="condition-right">
+                    <span class="risk-badge medium">Medium Risk</span>
+                    <span class="expand-icon">∨</span>
+                </div>
+            </div>
+            <div class="condition-item green">
+                <div class="condition-left">
+                    <div class="condition-letter green">M</div>
+                    <span class="condition-name">Melanocytic Nevus</span>
+                </div>
+                <div class="condition-right">
+                    <span class="risk-badge low">Low Risk</span>
+                    <span class="expand-icon">∨</span>
+                </div>
+            </div>
+            <div class="condition-item yellow">
+                <div class="condition-left">
+                    <div class="condition-letter yellow">A</div>
+                    <span class="condition-name">Actinic Keratosis</span>
+                </div>
+                <div class="condition-right">
+                    <span class="risk-badge medium">Medium Risk</span>
+                    <span class="expand-icon">∨</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prevention Section -->
+    <section class="prevention-section">
+        <span class="section-badge orange">Prevention Tips</span>
+        <h2 class="section-title">Protect Your <span class="highlight">Skin Health</span></h2>
+        <p class="section-subtitle">Evidence-based tips to reduce your risk and maintain healthy skin year-round.</p>
+        
+        <div class="prevention-grid">
+            <div class="prevention-card yellow">
+                <div class="prevention-icon yellow">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                </div>
+                <h4>Use SPF 30+ Daily</h4>
+                <p>Apply broad-spectrum sunscreen every morning, even on cloudy days. Reapply every 2 hours outdoors.</p>
+            </div>
+            <div class="prevention-card purple">
+                <div class="prevention-icon purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                </div>
+                <h4>Monthly Self-Checks</h4>
+                <p>Examine your skin monthly using the ABCDE rule: Asymmetry, Border, Color, Diameter, Evolution.</p>
+            </div>
+            <div class="prevention-card green">
+                <div class="prevention-icon green">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <h4>Annual Dermatologist Visit</h4>
+                <p>Schedule a full-body skin exam every year with a board-certified dermatologist.</p>
+            </div>
+            <div class="prevention-card cyan">
+                <div class="prevention-icon cyan">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </div>
+                <h4>Stay Hydrated</h4>
+                <p>Drink at least 8 glasses of water daily. Well-hydrated skin is healthier and more resilient.</p>
+            </div>
+            <div class="prevention-card lime">
+                <div class="prevention-icon lime">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                        <line x1="6" y1="1" x2="6" y2="4"/>
+                        <line x1="10" y1="1" x2="10" y2="4"/>
+                        <line x1="14" y1="1" x2="14" y2="4"/>
+                    </svg>
+                </div>
+                <h4>Antioxidant-Rich Diet</h4>
+                <p>Eat berries, leafy greens, and foods rich in vitamins C and E to protect skin from UV damage.</p>
+            </div>
+            <div class="prevention-card pink">
+                <div class="prevention-icon pink">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </div>
+                <h4>Avoid Tanning Beds</h4>
+                <p>Indoor tanning increases melanoma risk by 75%. Opt for self-tanning products instead.</p>
+            </div>
+        </div>
+    </section>
+
+    
+</body>
+</html>
