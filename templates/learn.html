@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Learn & Explore — SkinGuard AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface2: #f9f8f5;
+  --border: #e8e6e0;
+  --text: #1a1814;
+  --text2: #6b6760;
+  --text3: #9b9791;
+  --accent: #6c3bff;
+  --accent2: #ff5c35;
+  --accent3: #00c896;
+  --accent4: #ffb800;
+  --tag-detect: #dbeafe;
+  --tag-detect-text: #1d4ed8;
+  --tag-prev: #fef3c7;
+  --tag-prev-text: #92400e;
+  --tag-tech: #ede9fe;
+  --tag-tech-text: #6d28d9;
+  --tag-edu: #fce7f3;
+  --tag-edu-text: #9d174d;
+  --tag-treat: #d1fae5;
+  --tag-treat-text: #065f46;
+  --tag-incl: #ffedd5;
+  --tag-incl-text: #9a3412;
+  --radius: 18px;
+  --shadow: 0 2px 20px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── NAVBAR ─────────────────────────────── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #6c3bff, #a78bfa);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.logo span { color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all 0.2s;
+}
+
+.nav-link:hover { background: var(--bg); color: var(--text); }
+.nav-link.active { background: var(--accent); color: white; }
+
+.nav-link svg { width: 15px; height: 15px; }
+
+/* ── PAGE HEADER ─────────────────────────── */
+.page-header {
+  padding: 48px 48px 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.page-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.page-header p {
+  font-size: 15px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ── MAIN LAYOUT ─────────────────────────── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  padding: 0 48px 48px;
+  max-width: 1400px;
+}
+
+/* ── CHATBOT SIDEBAR ─────────────────────── */
+.chatbot-panel {
+  position: sticky;
+  top: 88px;
+  height: calc(100vh - 110px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.chatbot-header {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  padding: 20px;
+  color: white;
+}
+
+.chatbot-header-top {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 4px;
+}
+
+.chatbot-header-top svg { width: 18px; height: 18px; }
+
+.chatbot-header h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.chatbot-header p {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text3);
+  gap: 8px;
+  padding: 20px;
+}
+
+.chat-empty svg { width: 32px; height: 32px; opacity: 0.4; }
+.chat-empty p { font-size: 13px; line-height: 1.5; }
+
+.quick-questions {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quick-q {
+  padding: 8px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.quick-q:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.chat-input-area {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.chat-input:focus { border-color: var(--accent); background: white; }
+.chat-input::placeholder { color: var(--text3); }
+
+.chat-send {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.chat-send:hover { background: #5a2de0; transform: scale(1.05); }
+.chat-send svg { width: 14px; height: 14px; color: white; }
+
+/* Chat bubbles */
+.msg { display: flex; flex-direction: column; gap: 4px; animation: msgIn 0.3s ease; }
+@keyframes msgIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+.msg.user { align-items: flex-end; }
+.msg.bot  { align-items: flex-start; }
+
+.bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.msg.user .bubble {
+  background: var(--accent);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.bot .bubble {
+  background: var(--surface2);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.typing-indicator {
+  display: flex; gap: 4px; padding: 12px 16px;
+  background: var(--surface2);
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  width: fit-content;
+  border: 1px solid var(--border);
+}
+
+.typing-indicator span {
+  width: 6px; height: 6px;
+  background: var(--text3);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%,60%,100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* ── CONTENT AREA ────────────────────────── */
+.content-area { min-width: 0; }
+
+/* Article grid */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.article-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.article-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: #d0ccc4;
+}
+
+.tag {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.tag.detect  { background: var(--tag-detect);  color: var(--tag-detect-text); }
+.tag.prev    { background: var(--tag-prev);    color: var(--tag-prev-text); }
+.tag.tech    { background: var(--tag-tech);    color: var(--tag-tech-text); }
+.tag.edu     { background: var(--tag-edu);     color: var(--tag-edu-text); }
+.tag.treat   { background: var(--tag-treat);   color: var(--tag-treat-text); }
+.tag.incl    { background: var(--tag-incl);    color: var(--tag-incl-text); }
+
+.article-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.article-card p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.article-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.read-time { font-size: 12px; color: var(--text3); }
+
+.read-link {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: gap 0.2s;
+}
+
+.read-link:hover { gap: 8px; }
+.read-link svg { width: 14px; height: 14px; }
+
+/* ── ARTICLE READER ──────────────────────── */
+.article-reader {
+  display: none;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 40px;
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.article-reader.active { display: block; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+
+.back-btn:hover { color: var(--text); }
+.back-btn svg { width: 14px; height: 14px; }
+
+.reader-meta {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+
+.reader-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 28px;
+  color: var(--text);
+}
+
+.reader-body {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #2d2b27;
+}
+
+.reader-body h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+
+.reader-body p { margin-bottom: 16px; }
+
+.reader-body ul, .reader-body ol {
+  margin: 0 0 16px 20px;
+}
+
+.reader-body li { margin-bottom: 8px; }
+
+.reader-body strong { color: var(--text); font-weight: 600; }
+
+.reader-body .highlight-box {
+  background: linear-gradient(135deg, #ede9fe, #dbeafe);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media (max-width: 1024px) {
+  .main-layout { grid-template-columns: 1fr; padding: 0 20px 40px; }
+  .chatbot-panel { position: static; height: 500px; }
+  .navbar { padding: 0 20px; }
+  .page-header { padding: 32px 20px 24px; }
+  .articles-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="logo">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    SkinGuard <span>AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Home
+    </a>
+    <a href="/dermoscan" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+      Analyze
+    </a>
+    <a href="/hospitals" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Hospitals
+    </a>
+    <a href="/learn" class="nav-link active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Learn
+    </a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="header-icon">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Learn & Explore</h1>
+    <p>AI-powered skin health education and resources</p>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- CHATBOT SIDEBAR -->
+  <aside class="chatbot-panel">
+    <div class="chatbot-header">
+      <div class="chatbot-header-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <h3>Skin Health Q&A</h3>
+      </div>
+      <p>Ask any skin cancer question</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <p>Ask a question below or try one of the quick questions</p>
+      </div>
+    </div>
+
+    <div class="quick-questions">
+      <button class="quick-q" onclick="askQuick('What is melanoma?')">What is melanoma?</button>
+      <button class="quick-q" onclick="askQuick('How do I do a self skin exam?')">How do I do a self skin exam?</button>
+      <button class="quick-q" onclick="askQuick('What does the ABCDE rule mean?')">What does the ABCDE rule mean?</button>
+    </div>
+
+    <div class="chat-input-area">
+      <input class="chat-input" id="chatInput" type="text" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()"/>
+      <button class="chat-send" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main class="content-area">
+
+    <!-- Articles Grid -->
+    <div class="articles-grid" id="articlesGrid">
+
+      <div class="article-card" onclick="openArticle('abcde')">
+        <span class="tag detect">Detection</span>
+        <h3>The ABCDE Rule of Melanoma Detection</h3>
+        <p>Learn the 5 key warning signs that distinguish a normal mole from a potentially cancerous lesion.</p>
+        <div class="article-footer">
+          <span class="read-time">3 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('sunprotection')">
+        <span class="tag prev">Prevention</span>
+        <h3>Understanding Sun Protection</h3>
+        <p>SPF ratings, UVA vs UVB protection, and how to choose the right sunscreen for your skin type.</p>
+        <div class="article-footer">
+          <span class="read-time">4 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('aidetects')">
+        <span class="tag tech">Technology</span>
+        <h3>How AI Detects Skin Cancer</h3>
+        <p>A deep dive into EfficientNet, convolutional neural networks, and how Grad-CAM highlights areas of concern.</p>
+        <div class="article-footer">
+          <span class="read-time">5 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('types')">
+        <span class="tag edu">Education</span>
+        <h3>Types of Skin Cancer Compared</h3>
+        <p>Melanoma vs BCC vs SCC vs Actinic Keratosis — symptoms, risks, and treatment overview.</p>
+        <div class="article-footer">
+          <span class="read-time">6 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('afterdiagnosis')">
+        <span class="tag treat">Treatment</span>
+        <h3>After Diagnosis: What to Expect</h3>
+        <p>From biopsy to treatment — a walkthrough of what happens after a positive skin cancer diagnosis.</p>
+        <div class="article-footer">
+          <span class="read-time">7 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('skintones')">
+        <span class="tag incl">Inclusivity</span>
+        <h3>Skin Health for Different Skin Tones</h3>
+        <p>How skin cancer presents differently in darker skin tones and why early detection is harder to achieve.</p>
+        <div class="article-footer">
+          <span class="read-time">5 min read</span>
+          <span class="read-link">Read article <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Article Reader -->
+    <div class="article-reader" id="articleReader">
+      <button class="back-btn" onclick="closeArticle()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to articles
+      </button>
+      <div class="reader-meta" id="readerMeta"></div>
+      <h1 class="reader-title" id="readerTitle"></h1>
+      <div class="reader-body" id="readerBody"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── ARTICLE DATA ─────────────────────────────────────────────
+const articles = {
+  abcde: {
+    tag: '<span class="tag detect">Detection</span>',
+    title: 'The ABCDE Rule of Melanoma Detection',
+    body: `
+      <p>Skin cancer is one of the most common forms of cancer, with melanoma being its most serious type. Early detection is crucial for effective treatment and improved survival rates. The ABCDE Rule is a simple yet powerful tool that helps individuals recognize suspicious moles or skin lesions.</p>
+      <div class="highlight-box"><strong>Remember:</strong> This tool is for awareness only. Always consult a qualified dermatologist for a professional evaluation.</div>
+      <h2>What is the ABCDE Rule?</h2>
+      <p>The ABCDE Rule helps you assess moles or skin spots based on five key characteristics:</p>
+      <ul>
+        <li><strong>A — Asymmetry:</strong> If you draw a line through the middle of the mole, the two halves do not match. Melanomas often have an irregular shape, contrasting with benign moles which are usually symmetrical.</li>
+        <li><strong>B — Border:</strong> The borders of an early melanoma tend to be uneven. The edges may be scalloped or notched. A benign mole has smoother, more even borders.</li>
+        <li><strong>C — Color:</strong> Having a variety of colors is another warning signal. A benign mole is usually a single shade of brown. A melanoma may have different shades of brown, tan or black — and can even turn red, white or blue.</li>
+        <li><strong>D — Diameter:</strong> Melanomas are usually larger in diameter than the eraser on your pencil tip (¼ inch or 6mm), but they may sometimes be smaller when first detected.</li>
+        <li><strong>E — Evolving:</strong> Any change — in size, shape, color, elevation, or any new symptom such as bleeding, itching or crusting — points to danger.</li>
+      </ul>
+      <h2>When Should You See a Doctor?</h2>
+      <p>If you notice any of these warning signs, schedule an appointment with a dermatologist immediately. Don't wait. Early-stage melanoma has a 5-year survival rate of over 98% — but this drops dramatically in later stages.</p>
+      <h2>Monthly Self-Exams</h2>
+      <p>Perform a thorough skin self-examination once a month. Use a full-length mirror and a hand mirror to check hard-to-see areas. Document any moles with photographs so you can track changes over time.</p>
+    `
+  },
+  sunprotection: {
+    tag: '<span class="tag prev">Prevention</span>',
+    title: 'Understanding Sun Protection',
+    body: `
+      <p>Sun protection is the single most effective way to reduce your risk of skin cancer. Yet most people misunderstand SPF ratings and how to use sunscreen correctly.</p>
+      <h2>What Does SPF Mean?</h2>
+      <p>SPF stands for Sun Protection Factor. SPF 30 blocks about 97% of UVB rays. SPF 50 blocks about 98%. No sunscreen blocks 100% of UV rays — but consistent use dramatically reduces cancer risk.</p>
+      <h2>UVA vs UVB</h2>
+      <ul>
+        <li><strong>UVB rays</strong> cause sunburn and are the primary cause of skin cancer.</li>
+        <li><strong>UVA rays</strong> penetrate deeper into the skin, causing aging, wrinkles, and also contributing to cancer risk.</li>
+      </ul>
+      <p>Always choose <strong>broad-spectrum</strong> sunscreen, which protects against both UVA and UVB rays.</p>
+      <div class="highlight-box"><strong>Pro tip:</strong> Apply sunscreen 15–30 minutes before going outside and reapply every 2 hours, or immediately after swimming or sweating.</div>
+      <h2>Choosing the Right Sunscreen</h2>
+      <ul>
+        <li>SPF 30 or higher for daily use</li>
+        <li>SPF 50+ for extended outdoor activities</li>
+        <li>Water-resistant for swimming or sports</li>
+        <li>Mineral (zinc oxide/titanium dioxide) sunscreens are gentler for sensitive skin</li>
+      </ul>
+      <h2>Other Sun Protection Measures</h2>
+      <p>Sunscreen alone isn't enough. Wear protective clothing, wide-brimmed hats, and UV-blocking sunglasses. Seek shade between 10 AM and 4 PM when UV rays are strongest.</p>
+    `
+  },
+  aidetects: {
+    tag: '<span class="tag tech">Technology</span>',
+    title: 'How AI Detects Skin Cancer',
+    body: `
+      <p>Artificial Intelligence is revolutionizing dermatology. SkinGuard AI uses a deep learning model called EfficientNet to analyze dermoscopic images with remarkable accuracy.</p>
+      <h2>What is EfficientNet?</h2>
+      <p>EfficientNet is a convolutional neural network (CNN) architecture developed by Google Brain. It achieves state-of-the-art accuracy while being significantly more efficient than older models like ResNet or VGG. It was trained on millions of images and fine-tuned on dermatology datasets.</p>
+      <h2>How the Model Works</h2>
+      <ol>
+        <li><strong>Image Input:</strong> The skin image is resized to 224×224 pixels and normalized.</li>
+        <li><strong>Feature Extraction:</strong> Convolutional layers detect edges, textures, color patterns, and shapes.</li>
+        <li><strong>Classification:</strong> Fully connected layers map features to one of 5 classes.</li>
+        <li><strong>Softmax Output:</strong> A probability distribution is computed across all classes.</li>
+      </ol>
+      <h2>Training Data</h2>
+      <p>The model was trained on the <strong>HAM10000</strong> and <strong>ISIC</strong> datasets — collections of thousands of verified dermoscopic images from dermatology clinics worldwide, annotated by board-certified dermatologists.</p>
+      <div class="highlight-box"><strong>Important:</strong> SkinGuard AI is a screening support tool. It is not a replacement for professional medical diagnosis. Always consult a dermatologist.</div>
+      <h2>Grad-CAM Visualization</h2>
+      <p>Gradient-weighted Class Activation Mapping (Grad-CAM) shows where in the image the model focused its attention. This makes the AI's decision transparent and helps doctors understand what features triggered the prediction.</p>
+    `
+  },
+  types: {
+    tag: '<span class="tag edu">Education</span>',
+    title: 'Types of Skin Cancer Compared',
+    body: `
+      <p>Not all skin cancers are the same. Understanding the differences helps you recognize symptoms and seek appropriate care.</p>
+      <h2>Melanoma</h2>
+      <p>The most dangerous form of skin cancer. It develops in melanocytes (pigment-producing cells). While it accounts for only 1% of skin cancers, it causes the most deaths. It can spread quickly to other organs if not caught early.</p>
+      <ul>
+        <li>Risk: Very High</li>
+        <li>Early signs: Changing mole, dark irregular spot</li>
+        <li>Treatment: Surgery, immunotherapy, targeted therapy</li>
+      </ul>
+      <h2>Basal Cell Carcinoma (BCC)</h2>
+      <p>The most common type of skin cancer. It grows slowly and rarely spreads, but can cause significant local tissue damage if untreated.</p>
+      <ul>
+        <li>Risk: Medium (rarely life-threatening)</li>
+        <li>Early signs: Pearly or waxy bump, flat flesh-colored lesion</li>
+        <li>Treatment: Surgery, radiation, topical treatments</li>
+      </ul>
+      <h2>Squamous Cell Carcinoma (SCC)</h2>
+      <p>Second most common. More likely to spread than BCC but less than melanoma. Often appears on sun-exposed areas.</p>
+      <ul>
+        <li>Risk: Medium</li>
+        <li>Early signs: Firm red nodule, flat lesion with a scaly surface</li>
+        <li>Treatment: Surgery, radiation, chemotherapy</li>
+      </ul>
+      <h2>Actinic Keratosis</h2>
+      <p>A precancerous condition caused by years of sun exposure. If untreated, it can develop into SCC.</p>
+      <div class="highlight-box">Regular dermatologist check-ups are the most reliable way to catch all types of skin cancer early.</div>
+    `
+  },
+  afterdiagnosis: {
+    tag: '<span class="tag treat">Treatment</span>',
+    title: 'After Diagnosis: What to Expect',
+    body: `
+      <p>Receiving a skin cancer diagnosis can be overwhelming. Understanding what comes next can help reduce anxiety and allow you to prepare effectively.</p>
+      <h2>Step 1: Biopsy Confirmation</h2>
+      <p>A biopsy is typically performed to confirm the diagnosis. A small tissue sample is removed and examined under a microscope by a pathologist. Results usually take 1–2 weeks.</p>
+      <h2>Step 2: Staging</h2>
+      <p>For melanoma, staging determines how far the cancer has spread. Stages range from 0 (in situ) to IV (metastatic). This guides your treatment plan.</p>
+      <h2>Step 3: Treatment Options</h2>
+      <ul>
+        <li><strong>Surgery:</strong> The most common treatment. The tumor and surrounding tissue are removed.</li>
+        <li><strong>Mohs Surgery:</strong> A precise technique where thin layers are removed one at a time and examined immediately.</li>
+        <li><strong>Immunotherapy:</strong> Boosts your immune system to fight cancer cells. Used for advanced melanoma.</li>
+        <li><strong>Radiation Therapy:</strong> Used when surgery isn't possible or as a follow-up treatment.</li>
+        <li><strong>Targeted Therapy:</strong> Drugs that target specific mutations in cancer cells (e.g., BRAF inhibitors for melanoma).</li>
+      </ul>
+      <h2>Follow-Up Care</h2>
+      <p>After treatment, regular follow-up appointments are essential. Your dermatologist will schedule check-ups every 3–6 months for the first few years to monitor for recurrence.</p>
+      <div class="highlight-box"><strong>Mental health matters too.</strong> Seek support from counselors, support groups, or cancer care organizations. You don't have to go through this alone.</div>
+    `
+  },
+  skintones: {
+    tag: '<span class="tag incl">Inclusivity</span>',
+    title: 'Skin Health for Different Skin Tones',
+    body: `
+      <p>Skin cancer affects people of all skin tones, but darker skin tones face unique challenges in detection and often receive diagnoses at later, more dangerous stages.</p>
+      <h2>The Myth of Immunity</h2>
+      <p>A dangerous misconception exists that people with darker skin tones are immune to skin cancer. This is false. While melanin does provide some natural UV protection, it does not eliminate cancer risk.</p>
+      <h2>How Presentation Differs</h2>
+      <p>In darker skin tones, skin cancer often appears in less sun-exposed areas, making it harder to detect:</p>
+      <ul>
+        <li>Palms of hands and soles of feet (Acral Lentiginous Melanoma)</li>
+        <li>Under nails (subungual melanoma)</li>
+        <li>Mucous membranes</li>
+      </ul>
+      <h2>Why Late Diagnosis is More Common</h2>
+      <ul>
+        <li>Lack of awareness among patients and sometimes clinicians</li>
+        <li>AI training datasets historically underrepresented darker skin tones</li>
+        <li>Symptoms may look different and not match classic descriptions</li>
+      </ul>
+      <div class="highlight-box"><strong>SkinGuard AI's commitment:</strong> We are continuously working to improve our model's performance across all skin tones using diverse, inclusive training data.</div>
+      <h2>What You Can Do</h2>
+      <p>Regardless of your skin tone, perform monthly self-checks, visit a dermatologist annually, and advocate for yourself if you notice any unusual changes. Early detection saves lives across all skin tones.</p>
+    `
+  }
+};
+
+// ── ARTICLE NAVIGATION ───────────────────────────────────────
+function openArticle(id) {
+  const a = articles[id];
+  if (!a) return;
+  document.getElementById('readerMeta').innerHTML = a.tag;
+  document.getElementById('readerTitle').textContent = a.title;
+  document.getElementById('readerBody').innerHTML = a.body;
+  document.getElementById('articlesGrid').style.display = 'none';
+  const reader = document.getElementById('articleReader');
+  reader.classList.add('active');
+  reader.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeArticle() {
+  document.getElementById('articleReader').classList.remove('active');
+  document.getElementById('articlesGrid').style.display = 'grid';
+}
+
+// ── CHATBOT ───────────────────────────────────────────────────
+const chatMessages = document.getElementById('chatMessages');
+const chatEmpty    = document.getElementById('chatEmpty');
+const chatInput    = document.getElementById('chatInput');
+
+let typingEl = null;
+
+function addMessage(text, role) {
+  if (chatEmpty) chatEmpty.style.display = 'none';
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+
+  div.appendChild(bubble);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTyping() {
+  typingEl = document.createElement('div');
+  typingEl.className = 'msg bot';
+  typingEl.innerHTML = `
+    <div class="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>`;
+  chatMessages.appendChild(typingEl);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+async function callGemini(userMessage) {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: userMessage })
+  });
+  const data = await res.json();
+  return data.reply || "Sorry, I couldn't get a response. Please try again.";
+}
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  chatInput.value = '';
+  addMessage(text, 'user');
+  showTyping();
+
+  try {
+    const reply = await callGemini(text);
+    hideTyping();
+    addMessage(reply, 'bot');
+  } catch (e) {
+    hideTyping();
+    addMessage('Sorry, there was an error connecting to the AI. Please try again.', 'bot');
+  }
+}
+
+function askQuick(q) {
+  chatInput.value = q;
+  sendMessage();
+}
+</script>
+
+</body>
+</html>
