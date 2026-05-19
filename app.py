@@ -163,8 +163,8 @@ TRANSFORM = transforms.Compose([
 skin_model = None
 try:
     skin_model = torch.load(
-        r"D:\Cancer_detection\best_skin_model.pt\best_skin_model\data.pkl",
-        map_location="cpu"
+        "best_skin_model.pt",
+         map_location=torch.device("cpu")
     )
     if hasattr(skin_model, 'eval'):
         skin_model.eval()
