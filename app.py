@@ -1,18 +1,11 @@
 from groq import Groq
-# ============================================================
-# STANDARD IMPORTS
-# ============================================================
 import os
 import io
 import traceback
-
-# ============================================================
-# THIRD-PARTY IMPORTS
-# ============================================================
 import requests
+
 from dotenv import load_dotenv
 
-# ---- Flask ----
 from flask import (
     Flask,
     render_template,
@@ -22,8 +15,8 @@ from flask import (
     jsonify,
 )
 
-# ---- Flask extensions ----
 from flask_sqlalchemy import SQLAlchemy
+
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -32,52 +25,43 @@ from flask_login import (
     logout_user,
     current_user,
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ---- PyTorch ----
 import torch
 import torch.nn.functional as F
+
 from torchvision import transforms
+from torchvision.models import resnet18
+
 from PIL import Image
 
-# ---- Google Generative AI (Gemini) ----
-try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-    print("⚠️  google-generativeai not installed — Gemini guidance disabled.")
-
 
 # ============================================================
-# ENVIRONMENT VARIABLES
+# ENV
 # ============================================================
+
 load_dotenv()
 
-GEMINI_API_KEY  = os.getenv("GEMINI_API_KEY", "")
-GOOGLE_API_KEY  = os.getenv("GOOGLE_API_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+SECRET_KEY = os.getenv("SECRET_KEY", "secret123")
 
 
 # ============================================================
-# FLASK APPLICATION
+# APP
 # ============================================================
-app = Flask(
-    __name__,
-    static_folder="static",
-    template_folder="templates",
-)
 
-app.secret_key = os.getenv("SECRET_KEY", "skinguard-secret-change-in-prod")
+app = Flask(__name__)
 
+app.secret_key = SECRET_KEY
 
-# ============================================================
-# DATABASE CONFIGURATION
-# ============================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     "sqlite:///" + os.path.join(BASE_DIR, "users.db")
 )
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -86,277 +70,267 @@ db = SQLAlchemy(app)
 # ============================================================
 # LOGIN MANAGER
 # ============================================================
+
 login_manager = LoginManager()
+
 login_manager.init_app(app)
-login_manager.login_view = "login"            # redirect to /login if unauthenticated
-login_manager.login_message_category = "info"
+
+login_manager.login_view = "login"
 
 
 # ============================================================
 # USER MODEL
 # ============================================================
+
 class User(UserMixin, db.Model):
-    """Minimal user model — id, username, hashed password."""
 
-    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
 
-    id       = db.Column(db.Integer,     primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
+
     password = db.Column(db.String(300), nullable=False)
 
 
 @login_manager.user_loader
-def load_user(user_id: str):
+def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
 # ============================================================
-# GEMINI SETUP
-# ============================================================
-XAI_API_KEY = os.getenv("XAI_API_KEY", "")
-model="llama-3.3-70b-versatile",
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-grok_client = None
-if GROQ_API_KEY:
-    try:
-        grok_client = Groq(api_key=GROQ_API_KEY)
-        print("✅ Groq AI configured")
-    except Exception as exc:
-        print(f"⚠️  Groq configuration failed: {exc}")
-# ============================================================
-# PYTORCH MODEL SETUP
+# GROQ
 # ============================================================
 
-# -- Class definitions --
+grok_client = None
+
+if GROQ_API_KEY:
+
+    try:
+
+        grok_client = Groq(api_key=GROQ_API_KEY)
+
+        print("✅ Groq AI Ready")
+
+    except Exception as e:
+
+        print("Groq Error:", e)
+
+
+# ============================================================
+# MODEL CONFIG
+# ============================================================
+
 CLASS_NAMES = [
-    "Nevus",                  # 0
-    "Basal Cell Carcinoma",   # 1
-    "Benign Keratosis",       # 2
-    "Vascular Lesion",        # 3
-    "Melanoma",               # 4
+    "Nevus",
+    "Basal Cell Carcinoma",
+    "Benign Keratosis",
+    "Vascular Lesion",
+    "Melanoma"
 ]
 
-CANCER_CLASSES = {"Melanoma", "Basal Cell Carcinoma"}
-
-SEVERITY_MAP = {
-    "Melanoma":               "Critical",
-    "Basal Cell Carcinoma":   "High",
-    "Benign Keratosis":       "Moderate",
-    "Nevus":                  "Low",
-    "Vascular Lesion":        "Low",
+CANCER_CLASSES = {
+    "Melanoma",
+    "Basal Cell Carcinoma"
 }
 
-# -- Model path --
-MODEL_PATH = r"D:\Cancer_detection\best_skin_model.pt"
+SEVERITY_MAP = {
+    "Melanoma": "Critical",
+    "Basal Cell Carcinoma": "High",
+    "Benign Keratosis": "Moderate",
+    "Nevus": "Low",
+    "Vascular Lesion": "Low",
+}
 
-# -- Image transforms (ImageNet normalisation) --
+MODEL_PATH = os.path.join(BASE_DIR, "best_skin_model.pt")
+
+
+# ============================================================
+# TRANSFORMS
+# ============================================================
+
 TRANSFORM = transforms.Compose([
+
     transforms.Resize((224, 224)),
+
     transforms.ToTensor(),
+
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225],
-    ),
+        std=[0.229, 0.224, 0.225]
+    )
 ])
 
-# -- Load model --
+
+# ============================================================
+# LOAD MODEL
+# ============================================================
+
 skin_model = None
 
-def load_skin_model():
-    global skin_model
-    if skin_model is None:
-        skin_model = torch.load(
-            "best_skin_model.pt",
-            map_location=torch.device("cpu")
-        )
-    return skin_model
-# ============================================================
-# HELPER — IMAGE PREPROCESSING
-# ============================================================
-def preprocess_image(image: Image.Image) -> torch.Tensor:
-    """Convert a PIL image to a normalised (1, 3, 224, 224) tensor."""
-    image = image.convert("RGB")
-    tensor = TRANSFORM(image)
-    return tensor.unsqueeze(0)          # add batch dimension
+try:
 
+    model = resnet18(weights=None)
 
-# ============================================================
-# HELPER — GEMINI AI GUIDANCE
-# ============================================================
-def get_ai_guidance(prediction: str, confidence: float, cancer_status: str) -> str:
-    fallback = (
-        f"Prediction: {prediction} ({cancer_status}). "
-        f"Confidence: {confidence:.1f}%. Please consult a dermatologist."
+    model.fc = torch.nn.Linear(model.fc.in_features, 5)
+
+    model.load_state_dict(
+        torch.load(MODEL_PATH, map_location="cpu")
     )
+
+    model.eval()
+
+    skin_model = model
+
+    print("✅ Model Loaded")
+
+except Exception as e:
+
+    print("❌ MODEL LOAD ERROR")
+
+    print(e)
+
+
+# ============================================================
+# AI GUIDANCE
+# ============================================================
+
+def get_ai_guidance(prediction, confidence, cancer_status):
+
+    fallback = (
+        f"{prediction} detected with "
+        f"{confidence}% confidence."
+    )
+
     if grok_client is None:
         return fallback
+
     try:
+
         response = grok_client.chat.completions.create(
-            model="grok-3-mini",
+
+            model="llama-3.3-70b-versatile",
+
             messages=[
+
                 {
                     "role": "system",
-                    "content": "You are a professional medical AI assistant specialising in dermatology."
+                    "content": "You are a dermatology AI assistant."
                 },
+
                 {
                     "role": "user",
-                    "content": f"""A skin lesion analysis produced:
-- Predicted condition: {prediction}
-- Cancer status: {cancer_status}
-- Confidence: {confidence:.1f}%
+                    "content": f"""
+Predicted disease: {prediction}
+Cancer status: {cancer_status}
+Confidence: {confidence}%
 
-Provide:
-1. Disease Overview
-2. Severity Assessment
-3. Immediate Recommendations
-4. 5 Self-Care Steps
-5. Warning Signs
-6. Doctor Visit Advice
-
-Remind user this is an AI tool, not a diagnosis."""
+Give:
+1. Overview
+2. Severity
+3. Care tips
+4. Warning signs
+5. Doctor advice
+"""
                 }
             ]
         )
-        return response.choices[0].message.content.strip()
-    except Exception as exc:
-        print(f"⚠️  Grok guidance error: {exc}")
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+
+        print("AI ERROR:", e)
+
         return fallback
+
+
 # ============================================================
-# ROUTE — HOME
+# ROUTES
 # ============================================================
+
 @app.route("/")
 def home():
     return render_template("index.html")
-@app.route("/learn")
-def leern():
-    return render_template("learn.html")
 
-# ============================================================
-# ROUTE — SIGNUP
-# ============================================================
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
 
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "").strip()
+        username = request.form.get("username")
 
-        if not username or not password:
+        password = request.form.get("password")
+
+        existing = User.query.filter_by(username=username).first()
+
+        if existing:
+
             return render_template(
                 "signup.html",
-                error="Username and password are required.",
+                error="Username already exists"
             )
 
-        if User.query.filter_by(username=username).first():
-            return render_template(
-                "signup.html",
-                error="Username already taken. Please choose another.",
-            )
+        hashed = generate_password_hash(password)
 
-        try:
-            hashed_pw = generate_password_hash(password)
-            new_user  = User(username=username, password=hashed_pw)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for("login"))
+        user = User(
+            username=username,
+            password=hashed
+        )
 
-        except Exception as exc:
-            db.session.rollback()
-            traceback.print_exc()
-            return render_template(
-                "signup.html",
-                error=f"Database error: {exc}",
-            )
+        db.session.add(user)
 
-    return render_template("signup.html", error=None)
+        db.session.commit()
+
+        return redirect(url_for("login"))
+
+    return render_template("signup.html")
 
 
-# ============================================================
-# ROUTE — LOGIN
-# ============================================================
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "").strip()
+        username = request.form.get("username")
+
+        password = request.form.get("password")
 
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
+
             login_user(user)
-            next_page = request.args.get("next")
-            return redirect(next_page or url_for("home"))
+
+            return redirect(url_for("home"))
 
         return render_template(
             "login.html",
-            error="Invalid username or password.",
+            error="Invalid credentials"
         )
 
-    return render_template("login.html", error=None)
+    return render_template("login.html")
 
 
-# ============================================================
-# ROUTE — LOGOUT
-# ============================================================
 @app.route("/logout")
 @login_required
 def logout():
+
     logout_user()
+
     return redirect(url_for("home"))
-# ============================================================
-# ROUTE — LEARN PAGE
-# ============================================================
-@app.route('/learn')
+
+
+@app.route("/learn")
 def learn():
-    return render_template('learn.html')
+    return render_template("learn.html")
 
 
-# ============================================================
-# ROUTE — CHAT API (Gemini)
-# ============================================================
-@app.route('/api/chat', methods=['POST'])
-def chat():
-    try:
-        data    = request.get_json(silent=True) or {}
-        message = data.get('message', '').strip()
+@app.route("/hospitals")
+@login_required
+def hospitals():
+    return render_template("hospitals.html")
 
-        if not message:
-            return jsonify({'reply': 'Please ask a question.'})
 
-        if grok_client is None:
-            return jsonify({'reply': 'AI assistant unavailable. Check XAI_API_KEY in .env'})
-
-        response = grok_client.chat.completions.create(
-            model="grok-3-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful skin health assistant. Answer questions about skin cancer and dermatology clearly in 2-4 sentences. Always recommend consulting a real dermatologist."
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ]
-        )
-        reply = response.choices[0].message.content.strip()
-        return jsonify({'reply': reply})
-
-    except Exception as exc:
-        traceback.print_exc()
-        return jsonify({'reply': f'Error: {str(exc)}'})
-# ============================================================
-# ROUTE — DERMOSCAN PAGE
-# ============================================================
 @app.route("/dermoscan")
 @login_required
 def dermoscan():
@@ -364,144 +338,131 @@ def dermoscan():
 
 
 # ============================================================
-# ROUTE — ANALYZE API  (POST /dermoscan/api/analyze)
+# ANALYZE API
 # ============================================================
+
 @app.route("/dermoscan/api/analyze", methods=["POST"])
 @login_required
 def analyze():
-    """
-    Accepts a multipart image upload, runs inference, returns JSON.
-    """
 
     try:
 
-        # -- 1. Check model --
         if skin_model is None:
-            return jsonify({
-                "ok":    False,
-                "error": "Model not loaded. Contact the administrator.",
-            }), 503
 
-        # -- 2. Validate upload --
+            return jsonify({
+                "ok": False,
+                "error": "Model not loaded"
+            })
+
         if "file" not in request.files:
-            return jsonify({"ok": False, "error": "No image file provided."}), 400
+
+            return jsonify({
+                "ok": False,
+                "error": "No image uploaded"
+            })
 
         file = request.files["file"]
 
-        if file.filename == "":
-            return jsonify({"ok": False, "error": "Empty filename."}), 400
+        image = Image.open(file).convert("RGB")
 
-        # -- 3. Open image --
-        try:
-            image = Image.open(io.BytesIO(file.read())).convert("RGB")
-        except Exception:
-            return jsonify({"ok": False, "error": "Cannot read image file."}), 400
+        tensor = TRANSFORM(image).unsqueeze(0)
 
-        # -- 4. Preprocess --
-        tensor = preprocess_image(image)
-
-        # -- 5. Inference --
         with torch.no_grad():
+
             outputs = skin_model(tensor)
-            probs   = F.softmax(outputs, dim=1)[0]
 
-        confidence_val, predicted_idx = torch.max(probs, 0)
-        predicted_class    = CLASS_NAMES[predicted_idx.item()]
-        confidence_percent = round(confidence_val.item() * 100, 2)
+            probs = F.softmax(outputs, dim=1)[0]
 
-        # -- 6. Probability distribution --
-        distribution = {
-            CLASS_NAMES[i]: round(p.item() * 100, 2)
-            for i, p in enumerate(probs)
-        }
+        confidence, predicted = torch.max(probs, 0)
 
-        # -- 7. Derived metadata --
-        is_cancer     = predicted_class in CANCER_CLASSES
-        cancer_status = "Cancerous" if is_cancer else "Non-Cancerous"
-        severity      = SEVERITY_MAP.get(predicted_class, "Low")
+        prediction = CLASS_NAMES[predicted.item()]
 
-        # -- 8. Gemini guidance --
-        guidance = get_ai_guidance(
-            prediction=predicted_class,
-            confidence=confidence_percent,
-            cancer_status=cancer_status,
+        confidence_percent = round(
+            confidence.item() * 100,
+            2
         )
 
+        cancer_status = (
+            "Cancerous"
+            if prediction in CANCER_CLASSES
+            else "Non-Cancerous"
+        )
+
+        guidance = get_ai_guidance(
+            prediction,
+            confidence_percent,
+            cancer_status
+        )
+
+        distribution = {
+
+            CLASS_NAMES[i]: round(
+                probs[i].item() * 100,
+                2
+            )
+
+            for i in range(len(CLASS_NAMES))
+        }
+
         return jsonify({
-            "ok":            True,
-            "prediction":    predicted_class,
-            "confidence":    confidence_percent,
-            "distribution":  distribution,
-            "is_cancer":     is_cancer,
+
+            "ok": True,
+
+            "prediction": prediction,
+
+            "confidence": confidence_percent,
+
+            "distribution": distribution,
+
             "cancer_status": cancer_status,
-            "severity":      severity,
-            "guidance":      guidance,
+
+            "severity": SEVERITY_MAP[prediction],
+
+            "guidance": guidance
         })
 
-    except Exception as exc:
+    except Exception as e:
+
         traceback.print_exc()
-        return jsonify({"ok": False, "error": str(exc)}), 500
+
+        return jsonify({
+            "ok": False,
+            "error": str(e)
+        })
 
 
 # ============================================================
-# ROUTE — HOSPITALS PAGE
+# HOSPITAL SEARCH
 # ============================================================
-@app.route("/hospitals")
-@login_required
-def hospitals():
-    return render_template("hospitals.html")
 
-
-# ============================================================
-# ROUTE — SEARCH HOSPITALS API  (POST /search_hospitals)
-# ============================================================
 @app.route("/search_hospitals", methods=["POST"])
 @login_required
 def search_hospitals():
-    """
-    Accepts JSON  { "location": "<address or city>" }
-    Uses Google Geocoding + Places Nearby Search.
-    Returns JSON  { "center": {lat, lng}, "hospitals": [...] }
-    """
 
     try:
 
-        data     = request.get_json(silent=True) or {}
-        location = data.get("location", "").strip()
+        data = request.get_json()
 
-        if not location:
-            return jsonify({"ok": False, "error": "Location is required."}), 400
+        location = data.get("location")
 
-        if not GOOGLE_API_KEY:
-            return jsonify({
-                "ok":       False,
-                "error":    "Google API key not configured.",
-                "center":   {},
-                "hospitals": [],
-            }), 503
-
-        # -- Geocoding --
         geo_url = (
             "https://maps.googleapis.com/maps/api/geocode/json"
-            f"?address={requests.utils.quote(location)}"
+            f"?address={location}"
             f"&key={GOOGLE_API_KEY}"
         )
 
-        geo_res = requests.get(geo_url, timeout=10).json()
+        geo_res = requests.get(geo_url).json()
 
-        if not geo_res.get("results"):
+        if not geo_res["results"]:
+
             return jsonify({
-                "ok":       False,
-                "error":    "Location not found.",
-                "center":   {},
-                "hospitals": [],
+                "hospitals": []
             })
 
-        geo_location = geo_res["results"][0]["geometry"]["location"]
-        lat = geo_location["lat"]
-        lng = geo_location["lng"]
+        lat = geo_res["results"][0]["geometry"]["location"]["lat"]
 
-        # -- Nearby hospital search --
+        lng = geo_res["results"][0]["geometry"]["location"]["lng"]
+
         nearby_url = (
             "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
             f"?location={lat},{lng}"
@@ -510,57 +471,85 @@ def search_hospitals():
             f"&key={GOOGLE_API_KEY}"
         )
 
-        nearby_res = requests.get(nearby_url, timeout=10).json()
+        nearby_res = requests.get(nearby_url).json()
 
-        hospitals_list = []
+        hospitals = []
+
         for place in nearby_res.get("results", []):
-            hospitals_list.append({
-                "name":     place.get("name", "Unknown Hospital"),
-                "address":  place.get("vicinity", "Address not available"),
-                "rating":   place.get("rating", "N/A"),
-                "open_now": place.get("opening_hours", {}).get("open_now", False),
-                "lat":      place["geometry"]["location"]["lat"],
-                "lng":      place["geometry"]["location"]["lng"],
+
+            hospitals.append({
+
+                "name": place.get("name"),
+
+                "address": place.get("vicinity"),
+
+                "rating": place.get("rating"),
+
+                "open_now": place.get(
+                    "opening_hours",
+                    {}
+                ).get("open_now", False),
+
+                "lat": place["geometry"]["location"]["lat"],
+
+                "lng": place["geometry"]["location"]["lng"]
             })
 
         return jsonify({
-            "ok":       True,
-            "center":   {"lat": lat, "lng": lng},
-            "hospitals": hospitals_list,
+
+            "center": {
+                "lat": lat,
+                "lng": lng
+            },
+
+            "hospitals": hospitals
         })
 
-    except requests.exceptions.Timeout:
-        return jsonify({"ok": False, "error": "Request to Google API timed out."}), 504
+    except Exception as e:
 
-    except Exception as exc:
         traceback.print_exc()
-        return jsonify({"ok": False, "error": str(exc)}), 500
+
+        return jsonify({
+            "error": str(e)
+        })
 
 
 # ============================================================
-# ROUTE — HEALTH CHECK
+# HEALTH
 # ============================================================
+
 @app.route("/health")
 def health():
+
     return jsonify({
-        "status":       "running",
+
+        "status": "running",
+
         "model_loaded": skin_model is not None,
-        "gemini_ready": gemini_model is not None,
-        "logged_in":    current_user.is_authenticated,
+
+        "logged_in": current_user.is_authenticated
     })
 
 
 # ============================================================
-# DATABASE INITIALISATION
+# DB INIT
 # ============================================================
+
 with app.app_context():
+
     db.create_all()
-    print("✅ Database tables created / verified")
+
+    print("✅ Database Ready")
 
 
 # ============================================================
-# ENTRY POINT
+# MAIN
 # ============================================================
+
 if __name__ == "__main__":
-    print("🚀 SkinGuard AI running on http://localhost:5000")
-    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
