@@ -161,17 +161,15 @@ TRANSFORM = transforms.Compose([
 
 # -- Load model --
 skin_model = None
-try:
-    skin_model = torch.load(
-        "best_skin_model.pt",
-         map_location=torch.device("cpu")
-    )
-    if hasattr(skin_model, 'eval'):
-        skin_model.eval()
-    print("✅ MODEL LOADED SUCCESSFULLY")
-except Exception as exc:
-    print(f"❌ MODEL LOAD ERROR — {exc}")
-    traceback.print_exc()
+
+def load_skin_model():
+    global skin_model
+    if skin_model is None:
+        skin_model = torch.load(
+            "best_skin_model.pt",
+            map_location=torch.device("cpu")
+        )
+    return skin_model
 # ============================================================
 # HELPER — IMAGE PREPROCESSING
 # ============================================================
