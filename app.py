@@ -164,29 +164,6 @@ TRANSFORM = transforms.Compose([
 # LOAD MODEL
 # ============================================================
 
-skin_model = None
-
-try:
-
-    model = resnet18(weights=None)
-
-    model.fc = torch.nn.Linear(model.fc.in_features, 5)
-
-    model.load_state_dict(
-        torch.load(MODEL_PATH, map_location="cpu")
-    )
-
-    model.eval()
-
-    skin_model = model
-
-    print("✅ Model Loaded")
-
-except Exception as e:
-
-    print("❌ MODEL LOAD ERROR")
-
-    print(e)
 
 
 # ============================================================
