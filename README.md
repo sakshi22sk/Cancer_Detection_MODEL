@@ -1,4 +1,6 @@
 # SkinGuard AI — Intelligent Skin Cancer Detection & Healthcare Assistance Platform
+<img width="1873" height="891" alt="image" src="https://github.com/user-attachments/assets/5a5305eb-c5bb-4325-ba3a-4e8506954de3" />
+<img width="1857" height="887" alt="image" src="https://github.com/user-attachments/assets/ac2cddbb-0537-43a2-a5ed-882ce2a43183" />
 
 ## Overview
 
@@ -20,6 +22,7 @@ SkinGuard AI is an AI-powered healthcare platform designed to assist in the earl
 * Secure Flask backend
 
 ---
+<img width="1892" height="967" alt="image" src="https://github.com/user-attachments/assets/d2e5ad34-f899-4595-b471-24a4591c04c0" />
 
 # Supported Disease Classes
 
